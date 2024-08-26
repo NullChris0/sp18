@@ -135,7 +135,7 @@ public class Lists3Exercises {
                 }
                 else if (p[i].latitude == latGroup[j][0].latitude) {  // find same in other elements of p
                     int counter;
-                    // the original question is ??? < p.length-1, current maybe wrong
+                    // the original question is ?? < p.length-1, current maybe wrong
                     for (counter = 0; counter * counter + 1 < p.length - 1; counter++) {  // find free index in row
                         if (latGroup[j][counter] == null) {
                             break;
