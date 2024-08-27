@@ -1,4 +1,4 @@
-!*/
+*/
 !**.java
 !**.txt
 !**.json
@@ -49,3 +49,6 @@ $RECYCLE.BIN/
 *.lnk
 .idea
 out
+javax
+junit
+.iml

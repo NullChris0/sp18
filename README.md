@@ -11,3 +11,8 @@
 - Open the whole 61b folder which has hws, labs and projs. We need modular programming to step through our assignments.
 - Click the IDEA's Project Structure in the menu, import each homework as a single module. Inside module folder, add all subfolders as resource-code folder.
 - This way we can run each job even if other jobs contain unfinished code.
+
+### Note
+- After clone starter codes from remote skeleton, delete all the skeleton commit locally.
+- The repository only contains code files which is NOT in skeleton.
+- DON'T add any images or sounds into git, so that autograder will work.
