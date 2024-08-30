@@ -11,8 +11,12 @@
  getLast: The item we want to return is in position size - 1
  size: The number of items in the list should be size.
 */
-
-public class AList<T> {
+/*
+** implements List61B<Item> is essentially a promise.
+** AList is saying "I promise I will have and define all the attributes and behaviors
+   specified in the List61B interface"
+*/
+public class AList<T> implements List61B<T> {
     private T[] items;
     private int size;
 
@@ -29,6 +33,11 @@ public class AList<T> {
         items = a;
     }
 
+    @Override
+    public void addFirst(T x) {
+
+    }
+
     /** Inserts X into the back of the list. */
     public void addLast(T x) {
         if (size == items.length) {
@@ -39,6 +48,11 @@ public class AList<T> {
         size = size + 1;
     }
 
+    @Override
+    public T getFirst() {
+        return null;
+    }
+
     /** Returns the item from the back of the list. */
     public T getLast() {
         return items[size - 1];
@@ -46,6 +60,11 @@ public class AList<T> {
     /** Gets the ith item in the list (0 is the front). */
     public T get(int i) {
         return items[i];
+    }
+
+    @Override
+    public void insert(T x, int position) {
+
     }
 
     /** Returns the number of items in the list. */
