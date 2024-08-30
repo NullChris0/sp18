@@ -16,7 +16,7 @@ public class NBody {
         Planet[] allOfPlanets = readPlanets(fileName);
         double universR = readRadius(fileName);
 
-        StdAudio.play("./proj0/audio/2001.mid");
+        StdAudio.play("../proj0/audio/2001.mid");
         StdDraw.enableDoubleBuffering();
         StdDraw.setScale(-universR, universR);
         StdDraw.clear();
@@ -30,7 +30,7 @@ public class NBody {
             for (Planet p : allOfPlanets)
                 p.draw();
             StdDraw.show();
-            StdDraw.pause(20);
+            StdDraw.pause(50);
         }
 
         StdOut.printf("%d\n", allOfPlanets.length);
