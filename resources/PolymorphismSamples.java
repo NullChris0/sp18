@@ -51,6 +51,12 @@ public class PolymorphismSamples {
 
     static class Maximizer {
 
+        /**
+         * The Class itself isn't generic, but static method is.
+         * the generic identifier can have a type upper bound, is behind static clarify
+         * @param items Any Type of array
+         * @return Any Type of the max array element
+         */
         public static <T extends Comparable<T>> T max(T[] items) {
             int maxDex = 0;
             for (int i = 0; i < items.length; i += 1) {
