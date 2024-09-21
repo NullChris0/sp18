@@ -80,6 +80,11 @@ public class HexWorld {
         }
     }
 
+    /**
+     * calculate number of small hexagons in the land
+     * @param size the radius of hexagon land
+     * @return how many small hexagons
+     */
     public static int getSizeNum(int size) {
         if (size == 0) return 1;
         else return 6 * size + getSizeNum(size - 1);
