@@ -31,7 +31,6 @@ public class Maze extends Pixel {
         }
     }
 
-    // 随机选择一个起点，起点必须是尚未访问过的单元格
     private static Position randomStart(Random RAND, TETile[][] world) {
         Position ret;
         while (true) {
@@ -42,7 +41,7 @@ public class Maze extends Pixel {
         }
     }
 
-    // 获取当前单元格周围未访问的邻居
+    /** 根据间隔一格位置处的状态，返回可供延伸道路的坐标列表 */
     private static List<Position> getAccessible(Position current, TETile[][] world) {
         List<Position> neighbors = new ArrayList<>();
         for (Position p: surroundings(current, 2)) {
@@ -54,12 +53,17 @@ public class Maze extends Pixel {
         return neighbors;
     }
 
-    // 找到所有的死胡同
+    /**
+     * Find Origin DeadEnds in generated maze world.
+     * (DeadEnd is a FLOOR which has connected-FLOOR in only ONE direction)
+     * @param world 2D Tile Array
+     * @return List of Origin DeadEnds
+     */
     public static List<Position> findDeadEnds(TETile[][] world) {
         List<Position> deadEnds = new ArrayList<>();
         for (int x = 1; x < world.length - 1; x++) {
             for (int y = 1; y < world[0].length - 1; y++) {
-                if (world[x][y].equals(Tileset.FLOOR) && isDeadEnd(new Position(x, y), world)) {
+                if (isDeadEnd(new Position(x, y), world)) {
                     deadEnds.add(new Position(x, y));
                 }
             }
@@ -67,33 +71,38 @@ public class Maze extends Pixel {
         return deadEnds;
     }
 
-    // 判断某个位置是否是死胡同
+    /**  Determine whether a coordinate is a dead end */
     private static boolean isDeadEnd(Position input, TETile[][] world) {
+        if (!world[input.x][input.y].equals(Tileset.FLOOR)) {
+            return false;
+        }
         int pathCount = 0;
         for (Position p: surroundings(input, 1)) {
             if (isValid(p, world) && world[p.x][p.y].equals(Tileset.FLOOR)) {
                 pathCount++;
             }
         }
-        return pathCount == 1; // 如果只有一个方向是路径，则为死胡同
+        return pathCount == 1; // If only one direction is a path, it is a dead end
     }
 
-    // 递归移除死胡同，步数限制
-    public static void removeDeadEnds(List<Position> deadEnds, TETile[][] world, int steps) {
-        for (Position pos : deadEnds) {
-            removeDeadEnd(pos, world, steps);
+    /** (No Recursively) remove origin Deadends */
+    public static void removeDeadEnds(TETile[][] world, int steps) {
+        for (int i = 0; i < steps; i++) {
+            for (Position p: findDeadEnds(world)) {
+                world[p.x][p.y] = Tileset.NOTHING;
+            }
         }
     }
 
-    // 递归移除某个死胡同
-    private static void removeDeadEnd(Position pos, TETile[][] world, int steps) {
-        if (steps <= 0) return; // 达到步数限制，停止
+    @Deprecated
+    private static void _removeDeadEnds(Position pos, TETile[][] world, int steps) {
+        if (steps <= 0) return;
         world[pos.x][pos.y] = Tileset.NOTHING;
 
         // 继续检查相邻的路径，如果它们变成死胡同则继续移除
         for (Position p: surroundings(pos, 1)) {
             if (isValid(p, world) && isDeadEnd(p, world)) {
-                removeDeadEnd(p, world, steps - 1); // 递归移除相邻的死胡同
+                _removeDeadEnds(p, world, steps - 1);
             }
         }
     }

@@ -2,9 +2,16 @@ package byog.Core;
 
 import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
+import byog.TileEngine.Tileset;
 
 import java.util.Random;
 
+/**
+ * SOURCE:<p>
+ * THIS PROJECT GET Idea FROM:<p>
+ * <a href="https://blog.csdn.net/fourier_transformer/article/details/105340529">CSDN</a>
+ * <a href="https://indienova.com/indie-game-development/rooms-and-mazes-a-procedural-dungeon-generator/#iah-5">INDIENOVA</a>
+ */
 public class Game {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
@@ -34,7 +41,20 @@ public class Game {
         // and return a 2D tile representation of the world that would have been
         // drawn if the same inputs had been given to playWithKeyboard().
         long seed = Long.parseLong(input.replaceAll("[^0-9]", ""));
-        TETile[][] finalWorldFrame = TERenderer.initializeTiles(ter, WIDTH, HEIGHT);
-        return WorldCreator.generateWorld(new Random(seed), finalWorldFrame, ter);
+        TETile[][] finalWorldFrame = initializeTiles("Autograder");
+        return WorldCreator.generateWorld(new Random(seed), finalWorldFrame);
+    }
+
+    public TETile[][] initializeTiles(String prompt) {
+        if (prompt.compareTo("Autograder") != 0) {
+            ter.initialize(WIDTH, HEIGHT);
+        }
+        TETile[][] world = new TETile[WIDTH][HEIGHT];
+        for (int x = 0; x < WIDTH; x += 1) {
+            for (int y = 0; y < HEIGHT; y += 1) {
+                world[x][y] = Tileset.NOTHING;
+            }
+        }
+        return world;
     }
 }
