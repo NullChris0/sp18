@@ -134,13 +134,19 @@ public class Room extends Pixel {
         }
     }
 
+    /**
+     * Judging double-layer walls, in each direction.
+     * Simply go around the perimeter of the original wall is all WALL/NOTHING.
+     * @param direct up/down/left/right
+     */
     private boolean isExtraWall(char direct, TETile[][] world) {
         Position o;
         switch (direct) {
             case 'W':
                 o = new Position(this.corners[3].x, this.corners[3].y + 1);
                 for (int i = 0; i < this.width; i++) {
-                    if (world[o.x + i][o.y] != Tileset.WALL) {
+                    if (!isValid(new Position(o.x + i, o.y), world, Tileset.WALL)
+                    && !isValid(new Position(o.x + i, o.y), world, Tileset.NOTHING)) {
                         return false;
                     }
 //                    world[o.x + i][o.y] = Tileset.TREE;
@@ -149,7 +155,8 @@ public class Room extends Pixel {
             case 'R':
                 o = new Position(this.corners[0].x + 1, this.corners[0].y);
                 for (int i = 0; i < this.height; i++) {
-                    if (world[o.x][o.y - i] != Tileset.WALL) {
+                    if (!isValid(new Position(o.x, o.y - i), world, Tileset.WALL)
+                    && !isValid(new Position(o.x, o.y - i), world, Tileset.NOTHING)) {
                         return false;
                     }
 //                    world[o.x][o.y - i] = Tileset.TREE;
@@ -158,7 +165,8 @@ public class Room extends Pixel {
             case 'S':
                 o = new Position(this.corners[1].x, this.corners[1].y - 1);
                 for (int i = 0; i < this.width; i++) {
-                    if (world[o.x - i][o.y] != Tileset.WALL) {
+                    if (!isValid(new Position(o.x - i, o.y), world, Tileset.WALL)
+                    && !isValid(new Position(o.x - i, o.y), world, Tileset.NOTHING)) {
                         return false;
                     }
 //                    world[o.x - i][o.y] = Tileset.TREE;
@@ -167,7 +175,8 @@ public class Room extends Pixel {
             case 'L':
                 o = new Position(this.corners[2].x - 1, this.corners[2].y);
                 for (int i = 0; i < this.height; i++) {
-                    if (world[o.x][o.y + i] != Tileset.WALL) {
+                    if (!isValid(new Position(o.x, o.y + i), world, Tileset.WALL)
+                    && !isValid(new Position(o.x, o.y + i), world, Tileset.NOTHING)) {
                         return false;
                     }
 //                    world[o.x][o.y + i] = Tileset.TREE;
@@ -177,6 +186,9 @@ public class Room extends Pixel {
         return true;
     }
 
+    /**
+     * A room method to remove it's wall.
+     */
     private void removeExtraWall(char direct, TETile[][] world) {
         Position o;
         switch (direct) {
@@ -207,6 +219,9 @@ public class Room extends Pixel {
         }
     }
 
+    /**
+     * A Room method to let a room remove inner walls and update it's geometry.
+     */
     public void removeExtraWalls(TETile[][] world) {
         if (isExtraWall('W', world)) {
             removeExtraWall('W', world);

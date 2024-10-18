@@ -1,8 +1,10 @@
 package byog.Core;
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Position {
-    final int x, y;  // package-private
+public class Position implements Serializable {
+    private static final long serialVersionUID = 114514114514116L;
+    public final int x, y;  // package-private
     public Position(int x, int y) {
         this.x = x;
         this.y = y;

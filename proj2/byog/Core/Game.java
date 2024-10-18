@@ -4,7 +4,7 @@ import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
 
-import java.util.Random;
+import java.io.*;
 
 /**
  * SOURCE:<p>
@@ -17,6 +17,7 @@ public class Game {
     /* Feel free to change the width and height. */
     public static final int WIDTH = 107;
     public static final int HEIGHT = 53;
+    GameState interaction = new GameState();
 
     /**
      * Method used for playing a fresh game. The game should start from the main menu.
@@ -40,15 +41,17 @@ public class Game {
         // Fill out this method to run the game using the input passed in,
         // and return a 2D tile representation of the world that would have been
         // drawn if the same inputs had been given to playWithKeyboard().
-        long seed = Long.parseLong(input.replaceAll("[^0-9]", ""));
-        TETile[][] finalWorldFrame = initializeTiles("Autograder");
-        return WorldCreator.generateWorld(new Random(seed), finalWorldFrame);
+        char[] inputArray = input.toUpperCase().toCharArray();
+        if (input.charAt(0) == 'L') {
+            interaction = loadGame();
+        }
+        for (int i = 0; i < inputArray.length && !interaction.isGameOver(); i++) {
+            interaction.processInputString(inputArray[i]);
+        }
+        return interaction.world;
     }
 
-    public TETile[][] initializeTiles(String prompt) {
-        if (prompt.compareTo("Autograder") != 0) {
-            ter.initialize(WIDTH, HEIGHT);
-        }
+    public static TETile[][] initializeTiles() {
         TETile[][] world = new TETile[WIDTH][HEIGHT];
         for (int x = 0; x < WIDTH; x += 1) {
             for (int y = 0; y < HEIGHT; y += 1) {
@@ -56,5 +59,54 @@ public class Game {
             }
         }
         return world;
+    }
+
+    public static void saveGame(GameState g) {
+        File f = new File("./worldSave.ser");
+        try {
+            if (!f.exists()) {
+                f.createNewFile();
+            }
+            FileOutputStream fs = new FileOutputStream(f);
+            ObjectOutputStream os = new ObjectOutputStream(fs);
+            os.writeObject(g);
+            os.close();
+        }  catch (FileNotFoundException e) {
+            System.out.println("file not found");
+            System.exit(1);
+        } catch (IOException e) {
+            System.out.println(e);
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Load a GameState instance from file and start the previous game.
+     * @param ter Optional parameter if you want render.
+     * @return A GameState instance if worldSave.ser is valid, otherwise return new instance.
+     */
+    public static GameState loadGame(TERenderer... ter) {
+        File f = new File("./worldSave.ser");
+        if (f.exists()) {
+            try {
+                FileInputStream fs = new FileInputStream(f);
+                ObjectInputStream os = new ObjectInputStream(fs);
+                GameState g = (GameState) os.readObject();
+                os.close();
+                g.t = ter[0];
+                g.processInputString('S');
+                return g;
+            } catch (FileNotFoundException e) {
+                System.out.println("file not found");
+                System.exit(0);
+            } catch (IOException e) {
+                System.out.println(e);
+                System.exit(0);
+            } catch (ClassNotFoundException e) {
+                System.out.println("class not found");
+                System.exit(0);
+            }
+        }
+        return new GameState();
     }
 }

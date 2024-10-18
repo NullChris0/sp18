@@ -5,12 +5,22 @@ import byog.TileEngine.TETile;
 import java.util.*;
 
 public class RoomContainer {
-    private static final int BASE = 10 + new Random().nextInt(10);  // 生成房间数量
+    private static int BASE;
     private static int MAXTRIES = Pixel.MAXTRIES;  // 最大尝试生成次数
-    public List<Room> rooms;
+    public List<Room> rooms = new ArrayList<>(BASE);
+
+    /**
+     * IMPORTANT: Sets the total number of rooms using the provided Random object.
+     * This ensures that the generated worlds remain the same across different runs of the program,
+     * as long as the seed remains unchanged.
+     *
+     * @param rand the Random object used to generate the rooms
+     */
+    public void setBase(Random rand) {
+        BASE = 10 + rand.nextInt(10);  // 生成房间数量
+    }
 
     public void generateRooms(TETile[][] world, Random RAND) {
-        rooms = new ArrayList<>(BASE);
         while (rooms.size() < BASE && MAXTRIES-- != 0) {
             Room cand = new Room(world, RAND);
             boolean conflict = false;
@@ -42,7 +52,7 @@ public class RoomContainer {
             Room tar = connector2Room(randP, rooms);
             tar.useConnector(randP, world);
             mainPositions.remove(randP);
-            mainPositions.removeAll(randomRetain(tar, world, RAND, 0.7));
+            mainPositions.removeAll(randomRetain(tar, world, RAND, 0.99));
         }
     }
 
@@ -54,7 +64,7 @@ public class RoomContainer {
     public List<Position> randomRetain(Room r, TETile[][] world, Random RAND, double p) {
         List<Position> retained = new ArrayList<>();
         for (Position connector : r.getConnectors(world)) {
-            if (RAND.nextDouble() < p) { // 20% 几率保留
+            if (RAND.nextDouble() < p) {
                 retained.add(connector);
             }
         }

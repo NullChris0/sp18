@@ -3,9 +3,10 @@ import byog.TileEngine.*;
 
 import java.util.Random;
 
-import static byog.Core.Pixel.isInnerWall;
+import static byog.Core.Pixel.*;
 
 public class WorldCreator {
+    private static final Random RANDOM = new Random();
 
     /**
      * The tile rendering engine we provide takes in a 2D array of TETile objects
@@ -17,20 +18,36 @@ public class WorldCreator {
      * e.g. world[0][5] is 5 tiles up from the bottom left tile.
      * All values should be non-null, i.e. make sure to fill them all in before calling renderFrame.
      */
-    public static TETile[][] generateWorld(Random RAND, TETile[][] world) {
+    public static void generateWorld(long seed, TETile[][] world) {
+        RANDOM.setSeed(seed);
         /*
          * 生成逻辑：先确定房间，再在其余位置填充迷宫。
          */
         RoomContainer rg = new RoomContainer();
-        rg.generateRooms(world, RAND);
-        Maze.mazeGenerator(world, RAND);
-        fullOfWall(world);
+        rg.setBase(RANDOM);
+        rg.generateRooms(world, RANDOM);
+        Maze.mazeGenerator(world, RANDOM);
         rg.niceRooms(world);
-        rg.connectRooms(world, RAND);
-        Maze.removeDeadEnds(world, 0);
+        rg.connectRooms(world, RANDOM);
+        Maze.removeDeadEnds(world, 500);
+//        addRoadWalls(world);
         fullOfWall(world);
         removeInnerWalls(world);
-        return world;
+        easyDoor(world, RANDOM);
+    }
+
+    public static void addRoadWalls(TETile[][] world) {
+        for (int x = 0; x < world.length; x++) {
+            for (int y = 0; y < world[0].length; y++) {
+                if (world[x][y].equals(Tileset.FLOOR)) {
+                    for (Position p: surroundings(new Position(x, y), 1)) {
+                        if (isValid(p, world, Tileset.NOTHING)) {
+                            world[p.x][p.y] = Tileset.WALL;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public static void fullOfWall(TETile[][] world) {
@@ -56,16 +73,26 @@ public class WorldCreator {
                 if (!isInnerWall(new Position(j, i), world)) {
                     continue;
                 }
-                world[j][i] = Tileset.MOUNTAIN;
+                world[j][i] = Tileset.NOTHING;
             }
         }
     }
 
+    private static void easyDoor(TETile[][] world, Random RANDOM) {
+        Position r = new Position(RANDOM.nextInt(world.length), RANDOM.nextInt(world[0].length));
+        if (isValid(r, world, Tileset.WALL)) {
+            world[r.x][r.y] = Tileset.LOCKED_DOOR;
+        } else {
+            easyDoor(world, RANDOM);
+        }
+    }
+
     public static void main(String[] args) {
-        int seed = 23456758;
+        long seed = 23456758;
         Game tg = new Game();
-        TETile[][] w = tg.initializeTiles("Render");
-        generateWorld(new Random(seed), w);
+        tg.ter.initialize(Game.WIDTH, Game.HEIGHT);
+        TETile[][] w = Game.initializeTiles();
+        generateWorld(seed, w);
         tg.ter.renderFrame(w);
     }
 }

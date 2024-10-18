@@ -85,7 +85,9 @@ public class Maze extends Pixel {
         return pathCount == 1; // If only one direction is a path, it is a dead end
     }
 
-    /** (No Recursively) remove origin Deadends */
+    /** (No Recursively) remove origin Deadends
+     * More steps means more unused space in world.
+     */
     public static void removeDeadEnds(TETile[][] world, int steps) {
         for (int i = 0; i < steps; i++) {
             for (Position p: findDeadEnds(world)) {
