@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class Position implements Serializable {
     private static final long serialVersionUID = 114514114514116L;
-    public final int x, y;  // package-private
+    final int x, y;  // package-private
     public Position(int x, int y) {
         this.x = x;
         this.y = y;
@@ -20,9 +20,15 @@ public class Position implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
         Position other = (Position) obj;
         return x == other.x && y == other.y;
     }

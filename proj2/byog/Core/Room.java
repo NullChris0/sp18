@@ -1,5 +1,6 @@
 package byog.Core;
-import byog.TileEngine.*;
+import byog.TileEngine.Tileset;
+import byog.TileEngine.TETile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,18 +13,22 @@ public class Room extends Pixel {
     private static final int[] PICK = {5, 7, 9};  // 房间大小种类
     private List<Position> cachedConnectors;
 
-    public Room(TETile[][] world, Random RAND) {
-        int WIDTH = world.length;
-        int HEIGHT = world[0].length;
+    public Room(TETile[][] world, Random rand) {
+        int width = world.length;
+        int height = world[0].length;
         // 随机奇数
-        RandomUtils.shuffle(RAND, PICK);
-        this.width = PICK[0];
-        RandomUtils.shuffle(RAND, PICK);
-        this.height = PICK[0];
-        int startX = RAND.nextInt(WIDTH - this.width);
-        int startY = RAND.nextInt(HEIGHT - this.height);
+        this.width = PICK[rand.nextInt(PICK.length)];
+        this.height = PICK[rand.nextInt(PICK.length)];
+        int startX = rand.nextInt(width - this.width);
+        int startY = rand.nextInt(height - this.height);
         this.corners = getCorners(new Position(startX, startY), this.width, this.height);
     }
+//        Don't use RandomUtils!!!
+//        // 随机奇数
+//        RandomUtils.shuffle(rand, PICK);
+//        this.width = PICK[0];
+//        RandomUtils.shuffle(rand, PICK);
+//        this.height = PICK[0];
 
     /**
      * A Room method that print itself to world, include FLOOR and WALL
@@ -44,7 +49,7 @@ public class Room extends Pixel {
         }
     }
     @Deprecated
-    public void _add2World(TETile[][] world, String prompt) {
+    public void add2World(TETile[][] world, String prompt) {
         // 避免生成过厚的房间墙壁（由于迷宫生成的特性），所以在迷宫准备完毕后才填充墙壁
         // 实际上，仅生成房间地板后生成迷宫，使得迷宫可以利用房间地板进行随机生成
         // 在实际填充房间墙壁后，就会产生破碎的迷宫（不需要由于房间隔断而多次调用迷宫生成）
@@ -93,7 +98,8 @@ public class Room extends Pixel {
     }
 
     /**
-     * A Room method to get its edge positions, exclude corners and unconnected edges(pathCount != 2).
+     * A Room method to get its edge positions, exclude corners and unconnected edges
+     * (pathCount != 2).
      * <p>New change: Use a private attr to represent Room's connectors.
      * @return List of Positions
      */
@@ -146,7 +152,7 @@ public class Room extends Pixel {
                 o = new Position(this.corners[3].x, this.corners[3].y + 1);
                 for (int i = 0; i < this.width; i++) {
                     if (!isValid(new Position(o.x + i, o.y), world, Tileset.WALL)
-                    && !isValid(new Position(o.x + i, o.y), world, Tileset.NOTHING)) {
+                        && !isValid(new Position(o.x + i, o.y), world, Tileset.NOTHING)) {
                         return false;
                     }
 //                    world[o.x + i][o.y] = Tileset.TREE;
@@ -156,7 +162,7 @@ public class Room extends Pixel {
                 o = new Position(this.corners[0].x + 1, this.corners[0].y);
                 for (int i = 0; i < this.height; i++) {
                     if (!isValid(new Position(o.x, o.y - i), world, Tileset.WALL)
-                    && !isValid(new Position(o.x, o.y - i), world, Tileset.NOTHING)) {
+                        && !isValid(new Position(o.x, o.y - i), world, Tileset.NOTHING)) {
                         return false;
                     }
 //                    world[o.x][o.y - i] = Tileset.TREE;
@@ -166,7 +172,7 @@ public class Room extends Pixel {
                 o = new Position(this.corners[1].x, this.corners[1].y - 1);
                 for (int i = 0; i < this.width; i++) {
                     if (!isValid(new Position(o.x - i, o.y), world, Tileset.WALL)
-                    && !isValid(new Position(o.x - i, o.y), world, Tileset.NOTHING)) {
+                        && !isValid(new Position(o.x - i, o.y), world, Tileset.NOTHING)) {
                         return false;
                     }
 //                    world[o.x - i][o.y] = Tileset.TREE;
@@ -176,12 +182,13 @@ public class Room extends Pixel {
                 o = new Position(this.corners[2].x - 1, this.corners[2].y);
                 for (int i = 0; i < this.height; i++) {
                     if (!isValid(new Position(o.x, o.y + i), world, Tileset.WALL)
-                    && !isValid(new Position(o.x, o.y + i), world, Tileset.NOTHING)) {
+                            && !isValid(new Position(o.x, o.y + i), world, Tileset.NOTHING)) {
                         return false;
                     }
 //                    world[o.x][o.y + i] = Tileset.TREE;
                 }
                 break;
+            default:
         }
         return true;
     }
@@ -216,6 +223,7 @@ public class Room extends Pixel {
                     world[o.x][o.y + i] = Tileset.FLOOR;
                 }
                 break;
+            default:
         }
     }
 

@@ -1,13 +1,12 @@
 package byog.Core;
-import byog.TileEngine.*;
+import byog.TileEngine.TETile;
+import byog.TileEngine.Tileset;
 
 import java.util.Random;
 
 import static byog.Core.Pixel.*;
 
 public class WorldCreator {
-    private static final Random RANDOM = new Random();
-
     /**
      * The tile rendering engine we provide takes in a 2D array of TETile objects
      * and draws it to the screen. Let’s call this TETile[][] world for now.
@@ -19,21 +18,20 @@ public class WorldCreator {
      * All values should be non-null, i.e. make sure to fill them all in before calling renderFrame.
      */
     public static void generateWorld(long seed, TETile[][] world) {
-        RANDOM.setSeed(seed);
+        Random rand = new Random(seed);
         /*
          * 生成逻辑：先确定房间，再在其余位置填充迷宫。
          */
-        RoomContainer rg = new RoomContainer();
-        rg.setBase(RANDOM);
-        rg.generateRooms(world, RANDOM);
-        Maze.mazeGenerator(world, RANDOM);
+        RoomContainer rg = new RoomContainer(rand);
+        rg.generateRooms(world, rand);
+        Maze.mazeGenerator(world, rand);
         rg.niceRooms(world);
-        rg.connectRooms(world, RANDOM);
+        rg.connectRooms(world, rand);
         Maze.removeDeadEnds(world, 500);
 //        addRoadWalls(world);
         fullOfWall(world);
         removeInnerWalls(world);
-        easyDoor(world, RANDOM);
+        easyDoor(world, rand);
     }
 
     public static void addRoadWalls(TETile[][] world) {
@@ -78,13 +76,12 @@ public class WorldCreator {
         }
     }
 
-    private static void easyDoor(TETile[][] world, Random RANDOM) {
-        Position r = new Position(RANDOM.nextInt(world.length), RANDOM.nextInt(world[0].length));
-        if (isValid(r, world, Tileset.WALL)) {
-            world[r.x][r.y] = Tileset.LOCKED_DOOR;
-        } else {
-            easyDoor(world, RANDOM);
-        }
+    private static void easyDoor(TETile[][] world, Random rand) {
+        Position r;
+        do {
+            r = new Position(rand.nextInt(world.length), rand.nextInt(world[0].length));
+        } while (isValid(r, world, Tileset.WALL));
+        world[r.x][r.y] = Tileset.LOCKED_DOOR;
     }
 
     public static void main(String[] args) {

@@ -4,21 +4,28 @@ import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.FileNotFoundException;
 
 /**
  * SOURCE:<p>
  * THIS PROJECT GET Idea FROM:<p>
+ * @see
  * <a href="https://blog.csdn.net/fourier_transformer/article/details/105340529">CSDN</a>
- * <a href="https://indienova.com/indie-game-development/rooms-and-mazes-a-procedural-dungeon-generator/#iah-5">INDIENOVA</a>
+ * <a href=
+ * "https://indienova.com/indie-game-development/rooms-and-mazes-a-procedural-dungeon-generator/"
+ * >INDIENOVA</a>
  */
 public class Game {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
     public static final int WIDTH = 107;
     public static final int HEIGHT = 53;
-    GameState interaction = new GameState();
-
     /**
      * Method used for playing a fresh game. The game should start from the main menu.
      */
@@ -38,10 +45,8 @@ public class Game {
      * @return the 2D TETile[][] representing the state of the world
      */
     public TETile[][] playWithInputString(String input) {
-        // Fill out this method to run the game using the input passed in,
-        // and return a 2D tile representation of the world that would have been
-        // drawn if the same inputs had been given to playWithKeyboard().
         char[] inputArray = input.toUpperCase().toCharArray();
+        GameState interaction = new GameState();
         if (input.charAt(0) == 'L') {
             interaction = loadGame();
         }

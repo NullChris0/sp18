@@ -3,23 +3,29 @@ package byog.Core;
 import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
 
-import java.util.*;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.Random;
+
 
 public class Maze extends Pixel {
 
-    private static final Deque<Position> mazeList = new LinkedList<>(); // 用于存储当前路径
+    public static void mazeGenerator(TETile[][] world, Random rand) {
+        Deque<Position> mazeList = new LinkedList<>(); // 用于存储当前路径
+        int maxTry = Pixel.MAXTRIES;
 
-    public static void mazeGenerator(TETile[][] world, Random RAND) {
-        Position start = randomStart(RAND, world); // 随机起点
+        Position start = randomStart(rand, world); // 随机起点
         mazeList.addLast(start);
         world[start.x][start.y] = Tileset.FLOOR; // 标记起点为路径
 
-        while (!mazeList.isEmpty() && MAXTRIES-- != 0) {
+        while (!mazeList.isEmpty() && maxTry-- != 0) {
             Position current = mazeList.getLast(); // 获取当前路径中的最后一个点
             List<Position> neighbors = getAccessible(current, world); // 获取未访问的邻居
 
             if (!neighbors.isEmpty()) {
-                Position next = neighbors.get(RAND.nextInt(neighbors.size())); // 随机选择一个未访问的邻居
+                Position next = neighbors.get(rand.nextInt(neighbors.size())); // 随机选择一个未访问的邻居
                 // 打通当前单元格与选中的邻居之间的墙
                 Position mid = current.middlePosition(next);
                 world[mid.x][mid.y] = Tileset.FLOOR;
@@ -31,10 +37,10 @@ public class Maze extends Pixel {
         }
     }
 
-    private static Position randomStart(Random RAND, TETile[][] world) {
+    private static Position randomStart(Random rand, TETile[][] world) {
         Position ret;
         while (true) {
-            ret = new Position(RAND.nextInt(world.length), RAND.nextInt(world[0].length));
+            ret = new Position(rand.nextInt(world.length), rand.nextInt(world[0].length));
             if (world[ret.x][ret.y].equals(Tileset.NOTHING)) {
                 return ret;
             }
@@ -97,14 +103,16 @@ public class Maze extends Pixel {
     }
 
     @Deprecated
-    private static void _removeDeadEnds(Position pos, TETile[][] world, int steps) {
-        if (steps <= 0) return;
+    private static void removeDeadEnds(Position pos, TETile[][] world, int steps) {
+        if (steps <= 0) {
+            return;
+        }
         world[pos.x][pos.y] = Tileset.NOTHING;
 
         // 继续检查相邻的路径，如果它们变成死胡同则继续移除
         for (Position p: surroundings(pos, 1)) {
             if (isValid(p, world) && isDeadEnd(p, world)) {
-                _removeDeadEnds(p, world, steps - 1);
+                removeDeadEnds(p, world, steps - 1);
             }
         }
     }

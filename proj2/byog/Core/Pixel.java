@@ -1,5 +1,6 @@
 package byog.Core;
-import byog.TileEngine.*;
+import byog.TileEngine.TETile;
+import byog.TileEngine.Tileset;
 
 public abstract class Pixel {
 

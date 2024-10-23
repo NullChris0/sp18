@@ -4,7 +4,7 @@ import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
 import edu.princeton.cs.introcs.StdDraw;
 
-import java.io.*;
+import java.io.Serializable;
 
 /**
  * The GameState Class used to control the Game's Behavior and Interactivity.
@@ -13,7 +13,7 @@ import java.io.*;
  */
 public class GameState implements Serializable {
     private static final long serialVersionUID = 114514114514114L;
-    public transient TERenderer t;  // TERenderer if playing with keyboard
+    transient TERenderer t;  // TERenderer if playing with keyboard
     transient TETile[][] world;
     transient int xMouse, yMouse;
     Avatar thePlayer;
@@ -54,8 +54,11 @@ public class GameState implements Serializable {
             case PLAYING:
             case SAVING:
                 handleGameInput(key);
-                if (t != null) t.renderFrame(world);
+                if (t != null) {
+                    t.renderFrame(world);
+                }
                 break;
+            default:
         }
     }
 
@@ -70,6 +73,7 @@ public class GameState implements Serializable {
                 break;
             case 'Q':
                 break;
+            default:
         }
     }
 
@@ -87,7 +91,9 @@ public class GameState implements Serializable {
                 thePlayer.world = world;
             }
             currentState = State.PLAYING;
-            if (t != null) t.renderFrame(world);
+            if (t != null) {
+                t.renderFrame(world);
+            }
         } else if (Character.isDigit(key)) {
             seed = seed * 10 + (key - '0');
 //            updateSeedDisplay();
@@ -117,6 +123,7 @@ public class GameState implements Serializable {
             case 'Q':
                 quiting();
                 break;
+            default:
         }
     }
 
