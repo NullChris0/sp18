@@ -5,11 +5,9 @@ import byog.TileEngine.Tileset;
 
 import static byog.Core.Pixel.isValid;
 
-import java.io.Serializable;
 import java.util.Random;
 
-public class Avatar implements Serializable {
-    private static final long serialVersionUID = 114514114514115L;
+public class Avatar {
     private Position currentP;
     transient TETile[][] world;
 

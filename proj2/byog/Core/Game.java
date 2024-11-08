@@ -4,13 +4,9 @@ import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 /**
  * SOURCE:<p>
@@ -45,11 +41,8 @@ public class Game {
      * @return the 2D TETile[][] representing the state of the world
      */
     public TETile[][] playWithInputString(String input) {
-        char[] inputArray = input.toUpperCase().toCharArray();
+        char[] inputArray = loadGame(input.toUpperCase());
         GameState interaction = new GameState();
-        if (input.charAt(0) == 'L') {
-            interaction = loadGame();
-        }
         for (int i = 0; i < inputArray.length && !interaction.isGameOver(); i++) {
             interaction.processInputString(inputArray[i]);
         }
@@ -66,52 +59,25 @@ public class Game {
         return world;
     }
 
-    public static void saveGame(GameState g) {
-        File f = new File("./worldSave.ser");
-        try {
-            if (!f.exists()) {
-                f.createNewFile();
-            }
-            FileOutputStream fs = new FileOutputStream(f);
-            ObjectOutputStream os = new ObjectOutputStream(fs);
-            os.writeObject(g);
-            os.close();
-        }  catch (FileNotFoundException e) {
-            System.out.println("file not found");
-            System.exit(1);
-        } catch (IOException e) {
-            System.out.println(e);
-            System.exit(1);
-        }
-    }
-
     /**
-     * Load a GameState instance from file and start the previous game.
-     * @param ter Optional parameter if you want render.
-     * @return A GameState instance if worldSave.ser is valid, otherwise return new instance.
+     * Load the game by reading a previously saved String from a text file.
+     * In the case that a player attempts to load a game with no previous save,
+     * the game ends and the game window closes with no errors produced.
+     * @param input The input String this time provide.
+     * @return A completed character array which loaded contents.
      */
-    public static GameState loadGame(TERenderer... ter) {
-        File f = new File("./worldSave.ser");
-        if (f.exists()) {
+    public char[] loadGame(String input) {
+        if (input.charAt(0) == 'L') {
             try {
-                FileInputStream fs = new FileInputStream(f);
-                ObjectInputStream os = new ObjectInputStream(fs);
-                GameState g = (GameState) os.readObject();
-                os.close();
-                g.t = ter[0];
-                g.processInputString('S');
-                return g;
+                Scanner in = new Scanner(new File("./World.txt"));
+                while (in.hasNextLine()) {
+                    String lastPlay = in.nextLine();
+                    input = lastPlay + input.substring(1);
+                }
             } catch (FileNotFoundException e) {
-                System.out.println("file not found");
-                System.exit(0);
-            } catch (IOException e) {
-                System.out.println(e);
-                System.exit(0);
-            } catch (ClassNotFoundException e) {
-                System.out.println("class not found");
-                System.exit(0);
+                e.getStackTrace();
             }
         }
-        return new GameState();
+        return input.toUpperCase().toCharArray();
     }
 }

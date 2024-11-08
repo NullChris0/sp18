@@ -4,19 +4,23 @@ import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
 import edu.princeton.cs.introcs.StdDraw;
 
-import java.io.Serializable;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
+
 
 /**
  * The GameState Class used to control the Game's Behavior and Interactivity.
  * It should be Serializable as we want to save the previous Game.
  * The main idea of GameState is State Switch with enum type.
  */
-public class GameState implements Serializable {
-    private static final long serialVersionUID = 114514114514114L;
+public class GameState {
     transient TERenderer t;  // TERenderer if playing with keyboard
     transient TETile[][] world;
     transient int xMouse, yMouse;
-    Avatar thePlayer;
+    private final StringBuilder lastPlay = new StringBuilder();
+    private Avatar thePlayer;
     private long seed;
     private State currentState;
     private enum State {
@@ -74,6 +78,8 @@ public class GameState implements Serializable {
             case 'Q':
                 break;
             default:
+                currentState = State.GAMEOVER;
+                world = Game.initializeTiles();
         }
     }
 
@@ -105,25 +111,34 @@ public class GameState implements Serializable {
      */
     private void handleGameInput(char key) {
         switch (key) {
-            case 'W':
-                thePlayer.move(new int[]{0, 1});
-                break;
-            case 'S':
-                thePlayer.move(new int[]{0, -1});
-                break;
-            case 'A':
-                thePlayer.move(new int[]{-1, 0});
-                break;
-            case 'D':
-                thePlayer.move(new int[]{1, 0});
-                break;
             case ':':
                 currentState = State.SAVING;  // 等待下一个输入是否为Q
                 break;
             case 'Q':
                 quiting();
                 break;
+            case 'W':
+                thePlayer.move(new int[]{0, 1});
+            case 'S':
+                thePlayer.move(new int[]{0, -1});
+            case 'A':
+                thePlayer.move(new int[]{-1, 0});
+            case 'D':
+                thePlayer.move(new int[]{1, 0});
             default:
+                lastPlay.append(key);
+        }
+    }
+
+    public void saveGame() {
+        try {
+            File outFile = new File("./World.txt");
+            Writer out = new PrintWriter(outFile);
+            out.write("N" + seed + "S" + lastPlay);
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            e.getStackTrace();
         }
     }
 
@@ -134,7 +149,7 @@ public class GameState implements Serializable {
     private void quiting() {
         if (currentState == State.SAVING) {
             currentState = State.GAMEOVER;
-            Game.saveGame(this);
+            saveGame();
         }
         currentState = State.GAMEOVER;
     }
