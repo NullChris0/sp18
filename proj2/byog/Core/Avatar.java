@@ -9,6 +9,7 @@ import java.util.Random;
 
 public class Avatar {
     private Position currentP;
+    boolean hasWin = false;
     transient TETile[][] world;
 
     public Avatar(long seed, TETile[][] world) {
@@ -28,10 +29,14 @@ public class Avatar {
             world[currentP.x][currentP.y] = Tileset.FLOOR;
             currentP = newP;
         }
+        if (isValid(newP, world, Tileset.LOCKED_DOOR)) {
+            currentP = newP;
+            hasWin = true;
+        }
         draw();
     }
 
-    public void draw() {
+    private void draw() {
         world[currentP.x][currentP.y] = Tileset.PLAYER;
     }
 }

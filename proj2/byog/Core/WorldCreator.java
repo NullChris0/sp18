@@ -27,11 +27,12 @@ public class WorldCreator {
         Maze.mazeGenerator(world, rand);
         rg.niceRooms(world);
         rg.connectRooms(world, rand);
-        Maze.removeDeadEnds(world, 500);
+        Maze.removeDeadEnds(world, 1000);
 //        addRoadWalls(world);
         fullOfWall(world);
         removeInnerWalls(world);
         easyDoor(world, rand);
+        colorOfWorld(world, rand);
     }
 
     public static void addRoadWalls(TETile[][] world) {
@@ -58,9 +59,17 @@ public class WorldCreator {
         }
     }
 
+    public static void colorOfWorld(TETile[][] world, Random rand) {
+        for (int x = 0; x < world.length; x++) {
+            for (int y = 0; y < world[0].length; y++) {
+                world[x][y] = TETile.colorVariant(world[x][y], 32, 32, 32, rand);
+            }
+        }
+    }
+
     /** Remove all the inner walls.
      *  When all four corner positions of a wall aren't floor
-     *  it's called a inner wall.
+     *  it's called an inner wall.
      */
     private static void removeInnerWalls(TETile[][] world) {
         for (int i = 1; i < world[0].length - 1; i++) {
@@ -71,16 +80,24 @@ public class WorldCreator {
                 if (!isInnerWall(new Position(j, i), world)) {
                     continue;
                 }
-                world[j][i] = Tileset.NOTHING;
+                world[j][i] = Tileset.WATER;
             }
         }
     }
 
+    /**
+     * Generate door in the world, as long as the surround contains at least one floor
+     */
     private static void easyDoor(TETile[][] world, Random rand) {
         Position r;
+        Position[] s;
         do {
             r = new Position(rand.nextInt(world.length), rand.nextInt(world[0].length));
-        } while (isValid(r, world, Tileset.WALL));
+            s = surroundings(r, 1);
+        } while (!isValid(s[0], world, Tileset.FLOOR)
+                && !isValid(s[1], world, Tileset.FLOOR)
+                && !isValid(s[2], world, Tileset.FLOOR)
+                && !isValid(s[3], world, Tileset.FLOOR));
         world[r.x][r.y] = Tileset.LOCKED_DOOR;
     }
 

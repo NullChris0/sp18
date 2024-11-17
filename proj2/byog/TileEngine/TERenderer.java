@@ -83,10 +83,20 @@ public class TERenderer {
      * the screen in tiles.
      * @param world the 2D TETile[][] array to render
      */
-    public void renderFrame(TETile[][] world) {
+    public void renderFrame(TETile[][] world, int... mouses) {
         int numXTiles = world.length;
         int numYTiles = world[0].length;
         StdDraw.clear(new Color(0, 0, 0));
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 30));
+        try {
+            StdDraw.text(25, numYTiles + 1,
+                    "You are at (X: " + mouses[0]
+                            + " Y: " + mouses[1] + "): "
+                            + world[mouses[0]][mouses[1]].description());
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, TILE_SIZE - 2));
         for (int x = 0; x < numXTiles; x += 1) {
             for (int y = 0; y < numYTiles; y += 1) {
                 if (world[x][y] == null) {

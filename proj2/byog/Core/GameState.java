@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 
+import static byog.Core.Game.Menu.drawSeedPrompt;
+
 
 /**
  * The GameState Class used to control the Game's Behavior and Interactivity.
@@ -16,34 +18,43 @@ import java.io.Writer;
  * The main idea of GameState is State Switch with enum type.
  */
 public class GameState {
-    transient TERenderer t;  // TERenderer if playing with keyboard
+    transient TERenderer t;  // mark to use Gui
     transient TETile[][] world;
     transient int xMouse, yMouse;
-    private final StringBuilder lastPlay = new StringBuilder();
+    boolean mouseMoved = false;  // for mouse HUD
+    private final StringBuilder lastPlay = new StringBuilder();  // for save game
     private Avatar thePlayer;
-    private long seed;
+    private long seed = -2;  // placeholder before user input
     private State currentState;
+
+    public Avatar getThePlayer() {
+        return thePlayer;
+    }
+
     private enum State {
         MENU,           // 主菜单
         SEED_ENTRY,    // 输入种子
         PLAYING,       // 游戏进行中
         SAVING,        // 已保存
-        GAMEOVER
+        GAME_OVER      // 游戏结束标志
     }
 
     public GameState() {
         this.currentState = State.MENU;
     }
 
-    public GameState(TERenderer ter) {
-        t = ter;
-        this.currentState = State.MENU;
+    public void useGuiMode(TERenderer ter) {
+        this.t = ter;
         xMouse = (int) StdDraw.mouseX();
         yMouse = (int) StdDraw.mouseY();
     }
 
+    public void cancelGuiMode() {
+        this.t = null;
+        xMouse = yMouse = 0;
+    }
     public boolean isGameOver() {
-        return currentState == State.GAMEOVER;
+        return currentState != State.GAME_OVER;
     }
 
     public void processInputString(char key) {
@@ -52,15 +63,12 @@ public class GameState {
                 handleMenuInput(key);
                 break;
             case SEED_ENTRY:
-            case GAMEOVER:
+            case GAME_OVER:
                 handleSeedInput(key);
                 break;
             case PLAYING:
             case SAVING:
                 handleGameInput(key);
-                if (t != null) {
-                    t.renderFrame(world);
-                }
                 break;
             default:
         }
@@ -73,12 +81,14 @@ public class GameState {
         switch (key) {
             case 'N':
                 currentState = State.SEED_ENTRY;
-//                displaySeedPrompt();
+                if (t != null) {
+                    drawSeedPrompt(this);  // draw SeedMenu when using Gui mode, it will start game
+                }
                 break;
             case 'Q':
                 break;
-            default:
-                currentState = State.GAMEOVER;
+            default:  // for passing the autograder when inputString contains illegal Load behavior.
+                currentState = State.GAME_OVER;
                 world = Game.initializeTiles();
         }
     }
@@ -86,8 +96,12 @@ public class GameState {
     /**
      * Deal with seed input and start generate the world.
      * Changed: different behavior between load game and new game.
+     * Second Changed: return three state for Gui.(Notice that seed is initialized by 0)
+     * @return <p>{@code seed}: temporary seed while dealing keyboard inputs
+     * or illegal input pattern </p>
+     *  <p>{@code -1}: the keyboard 'S' when finishing enter seed
      */
-    private void handleSeedInput(char key) {
+    long handleSeedInput(char key) {
         if (key == 'S') {  // when seed is complete, always re create world array
             world = Game.initializeTiles();
             WorldCreator.generateWorld(seed, world);
@@ -97,36 +111,42 @@ public class GameState {
                 thePlayer.world = world;
             }
             currentState = State.PLAYING;
-            if (t != null) {
-                t.renderFrame(world);
-            }
+            return -1;
         } else if (Character.isDigit(key)) {
+            seed = seed < 0 ? 0 : seed;
             seed = seed * 10 + (key - '0');
-//            updateSeedDisplay();
+            return seed;
         }
+        return seed;
     }
 
     /**
      * Deal with KeyBoard input with Player's actions.
      */
     private void handleGameInput(char key) {
+        if (key != 'Q' && key != ':') {
+            lastPlay.append(key);
+        }
         switch (key) {
+            case 'W':
+                thePlayer.move(new int[]{0, 1});
+                break;
+            case 'S':
+                thePlayer.move(new int[]{0, -1});
+                break;
+            case 'A':
+                thePlayer.move(new int[]{-1, 0});
+                break;
+            case 'D':
+                thePlayer.move(new int[]{1, 0});
+                break;
             case ':':
                 currentState = State.SAVING;  // 等待下一个输入是否为Q
                 break;
             case 'Q':
                 quiting();
                 break;
-            case 'W':
-                thePlayer.move(new int[]{0, 1});
-            case 'S':
-                thePlayer.move(new int[]{0, -1});
-            case 'A':
-                thePlayer.move(new int[]{-1, 0});
-            case 'D':
-                thePlayer.move(new int[]{1, 0});
             default:
-                lastPlay.append(key);
         }
     }
 
@@ -143,14 +163,26 @@ public class GameState {
     }
 
     /**
-     * Quit the game.If State.SAVING, then save the GameState instance.
-     * The Game should start(again) with State.GAMEOVER or State.SEEDINPUT.
+     * Quit the game.</p>If {@link State#SAVING}, then save the {@code GameState} instance.
+     * The Game should start(again) with {@link State#GAME_OVER} or {@link State#SEED_ENTRY}
      */
     private void quiting() {
         if (currentState == State.SAVING) {
-            currentState = State.GAMEOVER;
+            currentState = State.GAME_OVER;
             saveGame();
         }
-        currentState = State.GAMEOVER;
+        currentState = State.GAME_OVER;
+    }
+
+    public void updateMouse() {
+        int tempX = (int) StdDraw.mouseX();
+        int tempY = (int) StdDraw.mouseY();
+        if ((tempX == xMouse) && (tempY == yMouse)) {
+            mouseMoved = false;
+        } else {
+            xMouse = tempX;
+            yMouse = tempY;
+            mouseMoved = true;
+        }
     }
 }
